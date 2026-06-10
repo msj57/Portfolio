@@ -40,7 +40,22 @@
   --ease-out:cubic-bezier(.22,1,.36,1);
   --ease-swift:cubic-bezier(.4,0,.2,1);
   --dur-s:180ms; --dur-m:420ms; --dur-l:800ms;
+
+  --shadow:none;
 }
+
+/* ---- Tema oscuro ---- */
+:root[data-theme="dark"]{
+  --paper:#0f151c;
+  --paper-2:#161e28;
+  --ink:#e8edf3;          /* claro sobre fondo oscuro */
+  --ink-soft:#9aa9ba;
+  --hairline:rgba(232,237,243,.14);
+  --hairline-strong:rgba(232,237,243,.42);
+  --accent:#6ba3e8;       /* azul mas luminoso para contraste */
+}
+html{transition:background var(--dur-m) var(--ease-swift)}
+body{transition:background var(--dur-m) var(--ease-swift),color var(--dur-m) var(--ease-swift)}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-padding-top:6rem}
@@ -86,7 +101,7 @@ body{
   font-family:var(--display);font-size:1.125rem;font-weight:600;
   letter-spacing:-.01em;color:var(--ink);text-decoration:none;
 }
-.site-nav{display:flex;align-items:baseline;gap:clamp(var(--s3),3vw,var(--s8))}
+.site-nav{display:flex;align-items:center;gap:clamp(var(--s3),3vw,var(--s8))}
 .site-nav a,.lang-toggle{
   font-size:var(--fs-label);font-weight:500;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink-soft);text-decoration:none;
@@ -106,6 +121,21 @@ body{
 }
 .lang-toggle::before{content:"";width:.7em;height:.7em;border-radius:50%;border:1.5px solid currentColor;flex:none}
 .lang-toggle:hover,.lang-toggle:focus-visible{background:var(--accent);color:var(--paper)}
+
+/* Boton de tema nocturno */
+.theme-toggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:2.25rem;height:2.25rem;
+  color:var(--ink-soft);background:none;border:1px solid var(--hairline-strong);
+  border-radius:999px;cursor:pointer;padding:0;
+  transition:color var(--dur-s) var(--ease-swift),border-color var(--dur-s) var(--ease-swift);
+}
+.theme-toggle:hover,.theme-toggle:focus-visible{color:var(--ink);border-color:var(--ink)}
+.theme-toggle svg{width:1.05rem;height:1.05rem;display:block}
+/* sol visible en oscuro, luna visible en claro */
+.theme-toggle .icon-sun{display:none}
+:root[data-theme="dark"] .theme-toggle .icon-sun{display:block}
+:root[data-theme="dark"] .theme-toggle .icon-moon{display:none}
 
 /* Subrayado animado — solo transform, origen izquierdo */
 .u-line{position:relative}
@@ -336,6 +366,10 @@ h2{
       <a class="u-line" href="#contacto"><span data-lang="es">Contacto</span><span data-lang="en">Contact</span></a>
       <button class="lang-toggle" id="langToggle" type="button" aria-live="polite">
         <span data-lang="es">English</span><span data-lang="en">Español</span>
+      </button>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
       </button>
     </nav>
   </div>
@@ -680,6 +714,23 @@ h2{
       if (saved === "en") setLocale("en");
     } catch(e){}
   }
+
+  /* Tema nocturno */
+  function setTheme(t){
+    root.setAttribute("data-theme", t);
+    try { localStorage.setItem("theme", t); } catch(e){}
+  }
+  (function initTheme(){
+    var saved = null;
+    try { saved = localStorage.getItem("theme"); } catch(e){}
+    if (saved === "dark" || saved === "light") { setTheme(saved); }
+    else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) { setTheme("dark"); }
+  })();
+  var themeBtn = document.getElementById("themeToggle");
+  if (themeBtn) themeBtn.addEventListener("click", function(){
+    var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    setTheme(next);
+  });
 
   /* Marquee: duplicar el contenido para bucle continuo */
   var track = document.getElementById("marqueeTrack");
